@@ -2,55 +2,109 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>数字神谕 - 木星核心 v4.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数字神谕 - 木星核心</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; color: #fff; }
-        #shader-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        :root {
+            --gold: #fceabb;
+            --sub-gold: #b8a47e;
+            --white: #ffffff;
+            --text-shadow: 0 0 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,1);
+        }
+
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background: #000; 
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
+            color: var(--white); 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #shader-canvas { 
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; z-index: 0; 
+        }
         
         #ui-layer {
             position: relative; z-index: 1; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center; pointer-events: none;
+            display: flex; justify-content: center; align-items: center; 
+            pointer-events: none;
         }
 
         .oracle-card {
-            width: 85%; max-width: 550px; background: transparent; text-align: center; pointer-events: auto;
+            width: 92%; max-width: 500px;
+            padding: 20px;
+            background: transparent; 
+            text-align: center;
+            pointer-events: auto;
+            box-sizing: border-box;
         }
 
         .sys-info {
-            font-size: 10px; letter-spacing: 5px; color: rgba(255, 255, 255, 0.3);
-            margin-bottom: 30px; text-transform: uppercase; text-shadow: 1px 1px 3px #000;
+            font-size: 10px; letter-spacing: 5px; color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 2rem; text-transform: uppercase; text-shadow: var(--text-shadow);
         }
 
         .energy-counter {
-            font-size: 11px; color: #b8a47e; margin-bottom: 10px; text-shadow: 1px 1px 2px #000;
+            font-size: 0.8rem; color: var(--sub-gold);
+            margin-bottom: 1rem; text-shadow: var(--text-shadow);
         }
 
+        /* 签位名称样式优化 */
         .sign-pos { 
-            font-size: 26px; font-weight: 600; margin-bottom: 20px; color: #fceabb; 
-            display: none; text-shadow: 0 0 10px #000, 0 0 20px #000; 
+            font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--gold); 
+            display: none; text-shadow: var(--text-shadow); 
+            letter-spacing: 1px;
         }
+
         .sign-verse { 
-            font-size: 19px; line-height: 1.8; margin-bottom: 40px; color: #fff; 
-            display: none; text-shadow: 0 0 10px #000, 0 0 20px #000; font-style: italic;
+            font-size: 1.2rem; line-height: 1.8; margin-bottom: 2.5rem; color: var(--white); 
+            display: none; text-shadow: var(--text-shadow); font-style: italic;
         }
         
         .result-box { 
             text-align: left; border-top: 1px solid rgba(255, 255, 255, 0.2); 
-            padding-top: 25px; display: none; 
+            padding-top: 1.5rem; display: none; 
         }
-        .result-label { font-size: 11px; color: #b8a47e; margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
-        .result-text { font-size: 15px; color: #efefef; line-height: 1.8; margin-bottom: 25px; text-shadow: 1px 1px 5px #000; }
+
+        .result-label { 
+            font-size: 0.75rem; color: var(--sub-gold); 
+            margin-bottom: 0.6rem; font-weight: bold; letter-spacing: 2px; 
+        }
+
+        .result-text { 
+            font-size: 0.95rem; color: #efefef; line-height: 1.7; 
+            margin-bottom: 1.5rem; text-shadow: var(--text-shadow);
+        }
+
+        .controls {
+            display: flex; flex-direction: column; align-items: center;
+            margin-top: 1rem;
+        }
 
         .btn {
-            background: transparent; border: 1px solid rgba(255, 255, 255, 0.5);
-            color: #fff; padding: 12px 35px; font-size: 13px; cursor: pointer;
-            transition: all 0.3s; margin: 10px; text-transform: uppercase; letter-spacing: 2px;
+            background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.5);
+            color: #fff; padding: 0.8rem 2.5rem; font-size: 0.9rem; 
+            cursor: pointer; transition: all 0.3s; 
+            text-transform: uppercase; letter-spacing: 2px;
+            width: auto; min-width: 160px;
+            border-radius: 2px;
+            margin: 0.5rem 0;
         }
-        .btn:hover:not(:disabled) { background: #fff; color: #000; box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+
+        .btn:hover:not(:disabled) { background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
         .btn:disabled { color: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.1); cursor: not-allowed; }
 
         .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media screen and (max-width: 480px) {
+            .sign-pos { font-size: 1.3rem; }
+            .sign-verse { font-size: 1.05rem; }
+            .result-text { font-size: 0.9rem; }
+            .btn { width: 85%; }
+        }
     </style>
 </head>
 <body>
@@ -66,54 +120,50 @@
         <div id="sign-verse" class="sign-verse"></div>
 
         <div id="interpret-box" class="result-box">
-            <div class="result-label">系统解读 // DECODING</div>
+            <div class="result-label">状态映射 // DECODING</div>
             <div id="sign-desc" class="result-text"></div>
-            <div class="result-label">行动建议 // SUGGESTION</div>
+            <div class="result-label">今日建议 // ACTION</div>
             <div id="sign-action" class="result-text"></div>
         </div>
 
-        <div id="controls">
-            <button id="btn-draw" class="btn" onclick="handleDraw()">建立感应</button>
-            <button id="btn-interpret" class="btn" style="display:none;" onclick="handleInterpret()">解析深意</button>
+        <div class="controls" id="controls">
+            <button id="btn-draw" class="btn" onclick="handleDraw()">开启感应</button>
+            <button id="btn-interpret" class="btn" style="display:none;" onclick="handleInterpret()">读取深意</button>
             <button id="btn-next" class="btn" style="display:none;" onclick="resetUI()">再次连接</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 扩充至 60 支签文的数据库 ---
+    // --- 签文数据库 ---
     const database = [
-        { pos: "0x01 稀薄大气", verse: "高处的风凛冽，<br>却能看清云层下的真相。", desc: "你最近可能感到有些孤立无援。其实这正是你脱离混乱、建立全局观的最佳时刻。", action: "试着从旁观者的角度看现在的烦恼，它其实很小。" },
-        { pos: "0x02 卫星凌日", verse: "短暂的遮蔽并非终结，<br>阴影过后，光芒将更加纯粹。", desc: "有人或事暂时掩盖了你的光芒。没关系，这只是运行轨道的必然，耐心等待阴影移开。", action: "今天不要急于证明自己，保持低调，积蓄能量。" },
-        { pos: "0x03 核心重力", verse: "万物皆向你汇聚，<br>因为你找到了自己的重心。", desc: "你的状态正在变得稳固。这种引力源于你内在的定力，不要被外界的波动轻易带走。", action: "坚定执行你本周的第一个计划，不回消息，只做事。" },
-        { pos: "0x04 冰晶环带", verse: "细碎的尘埃聚集，<br>也能构建环绕行星的光环。", desc: "不要轻视细微的进步。每天一点点的积累，正在你不知不觉中构建起宏大的成就。", action: "记录今天完成的三个小成就，无论多么微不足道。" },
-        { pos: "0x05 极光律动", verse: "能量在无声处爆发，<br>在黑暗中，你才是最绚烂的注脚。", desc: "你可能觉得自己做的事情没人看到。其实你的能量正在暗处产生影响，惊喜正在孕育中。", action: "去给那个默默支持你的人发个信息，分享你的心情。" },
-        { pos: "0x06 气体流变", verse: "没有形态就是最好的形态，<br>随风起舞，也是一种对抗。", desc: "不要死磕。如果一件事让你感到巨大的阻力，试着绕过去，换个思维方式可能就通了。", action: "尝试用一个完全不同的方法去处理今天最棘手的任务。" },
-        { pos: "0x07 恒星光压", verse: "遥远的力量在推动你前进，<br>你并不孤单，宇宙在护航。", desc: "你正在受到某种正面力量的加持，可能是朋友的帮助，也可能是好运。接住这份厚意。", action: "大方接受别人的赞美或帮助，不要推辞。" },
-        { pos: "0x08 磁层护盾", verse: "抵御风暴的不是盔甲，<br>而是你内心那道看不见的屏障。", desc: "外界评价比较频繁。只要你不从心底认可那些负面信息，它们就无法真正伤害你。", action: "屏蔽那个让你焦虑的信息源，哪怕只屏蔽一天。" },
-        { pos: "0x09 尘埃风暴", verse: "混乱只是暂时的排列，<br>尘埃落定后，大地将重归宁静。", desc: "生活可能有点乱套。但这只是在为你旧有的秩序做清理，混乱之后会有新的逻辑诞生。", action: "花10分钟整理一下你的物理桌面或电脑桌面。" },
-        { pos: "0x10 卫星逃逸", verse: "松开多余的束缚，<br>你将飞向更广阔的星辰。", desc: "你是不是抓得太紧了？某些已经不再适合你的关系或习惯，该放手就放手。", action: "放弃一个你坚持了很久但已经觉得累的小习惯。" },
-        { pos: "0x11 伽利略眼", verse: "发现真相需要勇气，<br>而第一眼看到的，往往是美丽。", desc: "一个真相即将浮出水面。不要害怕面对它，它带来的改变其实是对你的救赎。", action: "对自己诚实一次，承认那个你一直不敢面对的想法。" },
-        { pos: "0x12 永恒红斑", verse: "风暴中心最安静，<br>在喧嚣中，寻找你的避风港。", desc: "外界再乱，内心也可以拥有一片净土。这种平衡感是你最大的天赋。", action: "今天下午喝杯茶或咖啡，静坐5分钟，什么都不去想。" },
-        { pos: "0x13 离子共振", verse: "微小的震动，<br>能引发跨越时空的共鸣。", desc: "你的一句话或一个动作，可能会影响到很远的人。保持善意，能量会回到你身上。", action: "给一个不常联系的朋友点个赞，或者发个简单的表情包。" },
-        { pos: "0x14 潮汐锁定", verse: "始终如一的注视，<br>本身就是一种深情。", desc: "专注力是你现在的王牌。认定一个方向，不要被旁边闪烁的小星光带偏了方向。", action: "设定一个两小时的深度专注闹钟，中间不看手机。" },
-        { pos: "0x15 轨道摄动", verse: "微小的偏离轨迹，<br>带你去向未曾设想的终点。", desc: "意料之外的变数未必是坏事。它可能是在帮你避开一个原本注定的平庸结局。", action: "拥抱今天那个意外的变动，顺着它走下去试试。" },
-        { pos: "0x16 辐射余晖", verse: "散去的热量，<br>依然在温暖着寒冷的深空。", desc: "你过去的付出并没有白费。它们现在正化作无形的人脉或经验，在背后支撑着你。", action: "复盘一下三年前的梦想，看看你其实已经走了多远。" },
-        { pos: "0x17 虚空噪声", verse: "听不清的低语，<br>往往藏着最重要的代码。", desc: "直觉最近异常敏锐。那些莫名其妙的小预感，可能是你的大脑在帮你做决策。", action: "信任你今天产生的第一个直觉，哪怕它听起来不理性。" },
-        { pos: "0x18 奇点坍缩", verse: "极致的收敛，<br>是为了下一次大爆炸的诞生。", desc: "如果你感到无力或沉默，这其实是在积压。现在的沉默是为了未来的爆发。", action: "不要强迫自己社交，今天适合一个人待着积蓄能量。" },
-        { pos: "0x19 木卫二冰海", verse: "寒冷的外壳之下，<br>藏着生命最炽热的梦想。", desc: "你看起来很冷淡，但内心有很想做的事。别让外界的评价冻结了你的热诚。", action: "找个私密空间，写下你最想做却不敢说的三个愿望。" },
-        { pos: "0x20 极轴偏转", verse: "世界变了角度，<br>风景自然也换了颜色。", desc: "换个立场看问题。你认为的死局，在别人眼里可能只是一个起跳点。", action: "站在你讨厌的那个人的角度，想三秒钟他为什么这么做。" },
-        // ... (此处省略中间重复的定义，实际代码已包含完整的60支逻辑生成方式)
+        { pos: "状态特征：稀薄大气", verse: "高处的风凛冽，<br>却能看清云层下的真相。", desc: "你最近可能感到有些孤立无援。其实这正是你脱离混乱、建立全局观的最佳时刻。", action: "从旁观者的角度重新审视现在的烦恼，你会发现它比想象中小。" },
+        { pos: "状态特征：卫星凌日", verse: "短暂的遮蔽并非终结，<br>阴影过后，光芒将更加纯粹。", desc: "有人或事暂时掩盖了你的光芒。没关系，这只是运行轨道的必然，耐心等待阴影移开。", action: "今天不要急于证明自己，保持低调，默默积蓄能量。" },
+        { pos: "状态特征：核心重力", verse: "万物皆向你汇聚，<br>因为你找到了自己的重心。", desc: "你的状态正在变得稳固。这种引力源于你内在的定力，不要被外界的波动轻易带走。", action: "坚定执行你今日的第一个计划，关掉通知，只做事。" },
+        { pos: "状态特征：冰晶环带", verse: "细碎的尘埃聚集，<br>也能构建环绕行星的光环。", desc: "不要轻视细微的进步。每天一点点的积累，正在你不知觉中构建起宏大的成就。", action: "记录今天完成的三个小确幸或小成就，无论多么微不足道。" },
+        { pos: "状态特征：极光律动", verse: "能量在无声处爆发，<br>在黑暗中，你才是最绚烂的注脚。", desc: "你可能觉得自己做的事情没人看到。其实你的能量正在暗处产生影响，某种惊喜正在孕育中。", action: "给那个一直支持你的人发个感谢，或者分享一张你喜欢的照片。" },
+        { pos: "状态特征：气体流变", verse: "没有形态就是最好的形态，<br>随风起舞，也是一种对抗。", desc: "不要死磕。如果一件事让你感到巨大的阻力，试着绕过去，换个思维方式可能就通了。", action: "尝试用一个全新的角度去思考今天最棘手的那个任务。" },
+        { pos: "状态特征：磁层护盾", verse: "抵御风暴的不是盔甲，<br>而是你内心那道看不见的屏障。", desc: "外界评价最近比较嘈杂。只要你不从心底认可那些负面信息，它们就无法真正伤害你。", action: "有意识地屏蔽那个让你焦虑的信息源，哪怕只屏蔽这一天。" },
+        { pos: "状态特征：卫星逃逸", verse: "松开多余的束缚，<br>你将飞向更广阔的星辰。", desc: "你是不是抓得太紧了？某些已经不再适合你的关系或旧习惯，该放手时就放手。", action: "主动放弃一个你坚持了很久但已让你感到疲惫的负重。" },
+        { pos: "状态特征：永恒红斑", verse: "风暴中心最安静，<br>在喧嚣中，寻找你的避风港。", desc: "外界再乱，内心也可以拥有一片净土。这种平衡感是你最大的天赋。", action: "午休或睡前静坐 5 分钟，关掉感官，彻底放空。" },
+        { pos: "状态特征：潮汐锁定", verse: "始终如一的注视，<br>本身就是一种深情。", desc: "专注力是你现在的王牌。认定一个方向，不要被旁边闪烁的小利带偏了航向。", action: "设定一个 60 分钟的专注闹钟，期间不处理任何杂碎信息。" },
+        { pos: "状态特征：轨道摄动", verse: "微小的偏离轨迹，<br>带你去向未曾设想的终点。", desc: "意料之外的变数未必是坏事。它可能是在帮你避开一个原本注定的平庸结局。", action: "拥抱今天那个小小的意外，顺着它的节奏看看会发生什么。" },
+        { pos: "状态特征：辐射余晖", verse: "散去的热量，<br>依然在温暖着寒冷的深空。", desc: "你过去的付出并没有白费。它们现在正化作无形的人脉或经验，在背后支撑着你。", action: "翻看一张老照片或一段旧文字，你会发现自己已经走了很远。" },
+        { pos: "状态特征：奇点坍缩", verse: "极致的收敛，<br>是为了下一次大爆炸的诞生。", desc: "如果你感到无力或沉默，这其实是在积压能量。现在的沉默是为了未来的爆发。", action: "今晚适合早点休息，推掉无用的社交，享受孤独。" },
+        { pos: "状态特征：星云弥散", verse: "模糊的边缘，<br>孕育着无限可能的可能。", desc: "目前状态有些模糊不清？不要急着定义。在混沌中生长的东西，往往最具有创造力。", action: "画一张草图或写一段随笔，捕捉脑中那些一闪而过的念头。" },
+        { pos: "状态特征：超新星余迹", verse: "毁灭亦是新生，<br>旧的尘埃将成为新的星群。", desc: "某段关系的结束或项目的终止，其实是腾出了空间。星尘会重新聚集。", action: "整理一下衣柜或办公桌，丢掉那些你不再需要的东西。" },
+        { pos: "状态特征：双星共舞", verse: "在旋转的引力中，<br>找到彼此共存的律动。", desc: "合作与沟通是今天的主题。找到那个与你节奏互补的人，1+1 会远大于 2。", action: "主动邀请一位合作伙伴或朋友进行一次深度的对话。" }
     ];
 
-    // 为保证长期可用，如果数据库不足60，我们用算法生成剩余的变体
-    const baseCount = database.length;
-    for (let i = baseCount; i < 60; i++) {
+    // 自动补齐至 60 支，确保长期可用性
+    const subjects = ["概率波动", "能量坍缩", "相位偏移", "频率共振", "逻辑链路", "意识切片", "时空扰动"];
+    for (let i = database.length; i < 60; i++) {
+        const sub = subjects[i % subjects.length];
         database.push({
-            pos: `0x${(i+1).toString(16)} 概率映射`,
+            pos: `状态特征：${sub}`,
             verse: "流动的代码无迹可寻，<br>唯有信念是唯一的座标。",
-            desc: "这是系统为你生成的专属随机扰动。意味着你目前处于极高的自由度中，任何选择都是正确的。",
-            action: "掷一次硬币，或者让随随机播放的第一首歌决定你下午的心情。"
+            desc: "这是系统感应到的动态路径。意味着你目前拥有极高的自由度，任何选择都是正确的起点。",
+            action: "掷一次硬币，或随机听一首歌，让第一个灵感决定你下一步的行动。"
         });
     }
 
@@ -121,11 +171,11 @@
     let state = { date: "", count: 3 };
 
     function initSystem() {
-        const saved = localStorage.getItem('jupiter_oracle_state_v4');
+        const saved = localStorage.getItem('jupiter_oracle_state_v6');
         const today = new Date().toLocaleDateString();
         if (saved) {
             const parsed = JSON.parse(saved);
-            state = parsed.date === today ? parsed : { date: today, count: 3 };
+            state = (parsed.date === today) ? parsed : { date: today, count: 3 };
         } else {
             state = { date: today, count: 3 };
         }
@@ -134,10 +184,11 @@
 
     function updateDisplay() {
         document.getElementById('energy-display').innerText = `每日感应余量: ${state.count} / 3`;
-        localStorage.setItem('jupiter_oracle_state_v4', JSON.stringify(state));
+        localStorage.setItem('jupiter_oracle_state_v6', JSON.stringify(state));
         if (state.count <= 0) {
-            document.getElementById('btn-draw').disabled = true;
-            document.getElementById('btn-draw').innerText = "能量已耗尽";
+            const btnDraw = document.getElementById('btn-draw');
+            btnDraw.disabled = true;
+            btnDraw.innerText = "能量已耗尽";
         }
     }
 
@@ -176,7 +227,7 @@
         document.getElementById('btn-draw').style.display = 'inline-block';
     }
 
-    // --- 木星 Shader (原汁原味) ---
+    // --- 木星 Shader (响应式优化版) ---
     const canvas = document.querySelector('#shader-canvas');
     const gl = canvas.getContext('webgl');
     const vs = `attribute vec2 p; void main(){ gl_Position=vec4(p,0,1); }`;
@@ -191,9 +242,9 @@
             vec2 point = uv * zoom + offset;
             float a_x = .2; float a_y = .3;
             for(int i=1; i<10; i++){
-                float float_i = float(i); 
-                point.x += a_x*sin(float_i*point.y+time);
-                point.y += a_y*cos(float_i*point.x+time*0.8);
+                float f_i = float(i); 
+                point.x += a_x*sin(f_i*point.y+time);
+                point.y += a_y*cos(f_i*point.x+time*0.8);
             }
             float r = cos(point.x+point.y+2.)*.5+.5;
             float g = sin(point.x+point.y+2.2)*.5+.5;
@@ -201,29 +252,30 @@
             return vec3(r,g,b) + vec3(.4);
         }
         void main() {
-            vec2 resolution = iResolution.xy;
-            vec2 fragCoord = gl_FragCoord.xy;
-            vec2 texCoord = vec2(fragCoord.y / resolution.y, fragCoord.x / resolution.x);
-            vec2 center = resolution.xy / 2.;
-            float dis = distance(center, fragCoord);
-            float radius = resolution.y / 2.8;
+            vec2 res = iResolution.xy;
+            vec2 fC = gl_FragCoord.xy;
+            vec2 uv = fC / res.xy;
+            vec2 texCoord = vec2(uv.y, uv.x);
+            vec2 center = res.xy / 2.;
+            float dis = distance(center, fC);
+            float radius = min(res.x, res.y) * 0.38; 
             vec3 atmosphereColor = vec3(.7, .6, .5);
             if (dis < radius) {
-                vec2 pP = (fragCoord - (center - radius)) / (radius * 2.0);
+                vec2 pP = (fC - (center - radius)) / (radius * 2.0);
                 pP = pP * 2.0 - 1.0;
                 float sD = length(pP);
                 sD = 1.0 - pow(max(0.0, 1.0 - sD), .6);
                 pP = normalize(pP) * sD; pP = (pP + 1.0) / 2.0;
                 float light = pow(max(0.0, pP.x), 2.0*(cos(iTime*.1 +1.)+1.5));
                 vec3 sC = makeJupiter(texCoord) * light;
-                float fI = pow(dis / radius, 3.);
-                vec3 fres = mix(sC, atmosphereColor, fI * pow(max(0.0, pP.x), 2.));
-                gl_FragColor = vec4(fres * texCoord.x * 2.0, 1.0);
+                float fI = pow(dis / radius, 3.0);
+                vec3 fres = mix(sC, atmosphereColor, fI * pow(max(0.0, pP.x), 2.0));
+                gl_FragColor = vec4(fres * uv.x * 2.2, 1.0);
             } else {
-                float sA = rand(fragCoord, 0.0);
-                vec3 bg = (sA < .008) ? vec3(clamp(sA * 250.0, .1, .4)) : vec3(0);
-                float outter = pow(clamp((1.0 - dis/resolution.y - 0.45)/0.3, 0.0, 1.0), 2.8);
-                gl_FragColor = vec4(bg + atmosphereColor * outter, 1.0);
+                float sA = rand(fC, 0.0);
+                vec3 bg = (sA < .008) ? vec3(clamp(sA * 250.0, .1, .3)) : vec3(0);
+                float outter = pow(clamp((1.0 - (dis/radius)*0.6), 0.0, 1.0), 3.0);
+                gl_FragColor = vec4(bg + atmosphereColor * outter * 0.4, 1.0);
             }
         }
     `;
@@ -238,10 +290,14 @@
     const iTimeLoc = gl.getUniformLocation(prog, "iTime");
     const iResLoc = gl.getUniformLocation(prog, "iResolution");
     function render(time) {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
         gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform1f(iTimeLoc, time * 0.001); gl.uniform3f(iResLoc, canvas.width, canvas.height, 1.0);
-        gl.drawArrays(gl.TRIANGLES, 0, 6); requestAnimationFrame(render);
+        gl.uniform1f(iTimeLoc, time * 0.001);
+        gl.uniform3f(iResLoc, canvas.width, canvas.height, 1.0);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
     window.onload = initSystem;
